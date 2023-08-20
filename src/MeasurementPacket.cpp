@@ -2,6 +2,9 @@
 #include "MeasurementPacket.h"
 #include "G16A16TGA16M16TM16.h"
 #include "G16A16T16.h"
+#include "G16A16M16T16.h"
+#include "M16T16.h"
+#include "P32Tf.h"
 
 
 
@@ -103,6 +106,15 @@ MeasurementPacket* MeasurementPacket::fromBytes( const int8_t* b )
             break;
         case MeasurementPacket::G16A16T16_ID:
             mp = new G16A16T16( sensorId );
+            break;
+        case MeasurementPacket::G16A16M16T16_ID:
+            mp = new G16A16M16T16( sensorId );
+            break;
+        case MeasurementPacket::M16T16_ID:
+            mp = new M16T16( sensorId );
+            break;
+        case MeasurementPacket::P32Tf_ID:
+            mp = new P32Tf( sensorId );
             break;
         default:
             mp = NULL;
@@ -273,25 +285,25 @@ int16_t MeasurementPacket::int16Decode( int index ) const
 }
 
 
-void MeasurementPacket::int32Encode( int value , int index ) const
+void MeasurementPacket::int32Encode( int32_t value , int index ) const
 {
     MeasurementPacket::int32Encode( value , this->b.data() , MeasurementPacket::indexShifted( index ) );
 }
 
 
-int MeasurementPacket::int32Decode( int index ) const
+int32_t MeasurementPacket::int32Decode( int index ) const
 {
     return MeasurementPacket::int32Decode( this->b.data() , MeasurementPacket::indexShifted( index ) );
 }
 
 
-void MeasurementPacket::int64Encode( long value , int index ) const
+void MeasurementPacket::int64Encode( int64_t value , int index ) const
 {
     MeasurementPacket::int64Encode( value , this->b.data() , MeasurementPacket::indexShifted( index ) );
 }
 
 
-long MeasurementPacket::int64Decode( int index ) const
+int64_t MeasurementPacket::int64Decode( int index ) const
 {
     return MeasurementPacket::int64Decode( this->b.data() , MeasurementPacket::indexShifted( index ) );
 }

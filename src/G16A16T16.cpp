@@ -107,7 +107,7 @@ void G16A16T16::setAccelerometerMeasurement( int16_t ax , int16_t ay , int16_t a
 }
 
 
-void G16A16T16::setTemperatureGyroscopeAccelerometerMeasurement( int16_t temp )
+void G16A16T16::setTemperatureMeasurement( int16_t temp )
 {
     this->int16Encode( temp , 12 );
 }

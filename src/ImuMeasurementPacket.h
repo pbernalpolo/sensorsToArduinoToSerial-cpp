@@ -2,21 +2,14 @@
 #define _IMU_MEASUREMENT_PACKET_H_
 
 
+#include "GyroscopeMeasurementPacket.h"
+#include "AccelerometerMeasurementPacket.h"
+
+
 
 class ImuMeasurementPacket
+    : GyroscopeMeasurementPacket , AccelerometerMeasurementPacket
 {
-    ////////////////////////////////////////////////////////////////
-    // PUBLIC ABSTRACT METHODS
-    ////////////////////////////////////////////////////////////////
-    public:
-        virtual double xGyroscope() = 0;
-        virtual double yGyroscope() = 0;
-        virtual double zGyroscope() = 0;
-        virtual double temperatureGyroscope() = 0;
-        virtual double xAccelerometer() = 0;
-        virtual double yAccelerometer() = 0;
-        virtual double zAccelerometer() = 0;
-        virtual double temperatureAccelerometer() = 0;
 
 };
 

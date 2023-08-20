@@ -20,6 +20,9 @@ class MeasurementPacket
     public:
         static const int16_t G16A16TGA16M16TM16_ID = 0;
         static const int16_t G16A16T16_ID = 1;
+        static const int16_t G16A16M16T16_ID = 2;
+        static const int16_t M16T16_ID = 3;
+        static const int16_t P32Tf_ID = 4;
     
 
     ////////////////////////////////////////////////////////////////
@@ -100,10 +103,10 @@ class MeasurementPacket
         int8_t int8Decode( int index ) const;
         void int16Encode( int16_t value , int index ) const;
         int16_t int16Decode( int index ) const;
-        void int32Encode( int value , int index ) const;
-        int int32Decode( int index ) const;
-        void int64Encode( long value , int index ) const;
-        long int64Decode( int index ) const;
+        void int32Encode( int32_t value , int index ) const;
+        int32_t int32Decode( int index ) const;
+        void int64Encode( int64_t value , int index ) const;
+        int64_t int64Decode( int index ) const;
         void floatEncode( float value , int index ) const;
         float floatDecode( int index ) const;
         void doubleEncode( double value , int index ) const;
