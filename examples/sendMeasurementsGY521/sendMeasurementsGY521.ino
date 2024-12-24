@@ -3,7 +3,7 @@
 // and substitute in compiler flags "-Os" by "-O3"
 
 
-#define DEVICE_ID 51
+#define DEVICE_ID 21
 #define LED_PIN 13
 // choose one mode:
 #define MEASUREMENT_PACKET_MODE
@@ -78,10 +78,10 @@ void setup() {
   
   // configure device
   accelgyro.setRate( 8 );  // while ODR_w=8kHz, ODR_a=1kHz => we divide by 8 to obtain the same sample rates and the same accel measurement is not used twice // no divider -> max sample rate
-  accelgyro.setDLPFMode( MPU6050_IMU::MPU6050_DLPF_BW_256 );  // no low-pass filter -> max sample rate
-  accelgyro.setDHPFMode( MPU6050_IMU::MPU6050_DHPF_RESET );  // no high-pass filter
-  accelgyro.setFullScaleAccelRange( MPU6050_IMU::MPU6050_ACCEL_FS_16 );  // 16g
-  accelgyro.setFullScaleGyroRange( MPU6050_IMU::MPU6050_GYRO_FS_2000 );  // 2000deg/s
+  accelgyro.setDLPFMode( MPU6050_DLPF_BW_256 );  // no low-pass filter -> max sample rate
+  accelgyro.setDHPFMode( MPU6050_DHPF_RESET );  // no high-pass filter
+  accelgyro.setFullScaleAccelRange( MPU6050_ACCEL_FS_16 );  // 16g
+  accelgyro.setFullScaleGyroRange( MPU6050_GYRO_FS_2000 );  // 2000deg/s
 
   // verify connection
   Serial.println("Testing device connections...");
