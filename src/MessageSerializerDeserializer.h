@@ -2,7 +2,7 @@
 #define _MESSAGE_SERIALIZER_DESERIALIZER_H_
 
 
-#define MESSAGE_MAX_SIZE 100
+#define MESSAGE_MAX_SIZE 50
 
 
 #include <stdint.h>

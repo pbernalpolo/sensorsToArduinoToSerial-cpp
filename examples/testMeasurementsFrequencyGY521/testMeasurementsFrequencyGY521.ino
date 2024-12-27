@@ -2,11 +2,23 @@
 // ~/.arduino15/packages/arduino/hardware/avr/1.8.6/platform.txt
 // and substitute in compiler flags "-Os" by "-O3"
 
+/*
+getMotion6:
+  0.001796 [s]
+  556.859802 [Hz]
+getAcceleration:
+  0.000987 [s]
+  1013.495666 [Hz]
+getRotation:
+  0.000988 [s]
+  1012.125244 [Hz]
+getTemperature:
+  0.000583 [s]
+  1714.230834 [Hz]
+*/
 
-#define DEVICE_ID 51
+
 #define LED_PIN 13
-// Comment the following line to enable PRINT_MEASUREMENTS_MODE
-#define MEASUREMENT_PACKET_MODE
 
 
 // I2Cdev and MPU6050 must be installed as libraries, or else the .cpp/.h files
@@ -20,11 +32,6 @@
     #include "Wire.h"
 #endif
 
-#include <avr/wdt.h>  // Arduino watchdog to reset if it gets stuck
-
-#include "G16A16T16.h"
-#include "MessageSerializerDeserializer.h"
-
 
 // class default I2C address is 0x68
 // specific I2C addresses may be passed as a parameter here
@@ -33,17 +40,8 @@
 MPU6050 accelgyro;
 //MPU6050 accelgyro(0x69); // <-- use for AD0 high
 
-G16A16T16 mpu6050mp = G16A16T16( DEVICE_ID );
-MessageSerializerDeserializer messageSerializer = MessageSerializerDeserializer();
-
-int16_t counter;
-
 
 void setup() {
-  // first of all, we reset the watchdog, and we enable it
-  wdt_reset();
-  wdt_enable(WDTO_1S);
-  
   // configure Arduino LED pin for output, and activate it during setup
   pinMode( LED_PIN , OUTPUT );
   digitalWrite( LED_PIN , true );
@@ -85,36 +83,49 @@ void setup() {
   Serial.println("Testing device connections...");
   Serial.println(accelgyro.testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed");
 
-  // initialize counter
-  counter = 0;
-
   // we deactivate the led before entering the loop
   digitalWrite( LED_PIN , false );
 }
 
 
 void loop() {
-  // first, we reset the watchdog
-  wdt_reset();
-  
-  // read raw accel/gyro measurements from device
   int16_t ax, ay, az;
   int16_t gx, gy, gz;
-  accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-  int16_t temperature = accelgyro.getTemperature();
-
-  // set information in MeasurementPacket
-  counter++;
-  mpu6050mp.setCount( counter );
-  mpu6050mp.setGyroscopeMeasurement( gx , gy , gz );
-  mpu6050mp.setAccelerometerMeasurement( ax , ay , az );
-  mpu6050mp.setTemperatureMeasurement( temperature );
   
-  #if defined MEASUREMENT_PACKET_MODE
-    int8_t* theBytes = messageSerializer.prepareBytesToWrite( mpu6050mp.bytes() , mpu6050mp.bytesLength() );
-    Serial.write( (byte*)theBytes , messageSerializer.preparedBytesToWriteLength() );
-  #else
-    mpu6050mp.print();
-  #endif
+  int N = 1000;
+  float dt0 = 0.0;
+  float dt1 = 0.0;
+  float dt2 = 0.0;
+  float dt3 = 0.0;
+  for(int i=0; i<N; i++){
+    unsigned long t0 = micros();
+    accelgyro.getMotion6( &ax , &ay , &az , &gx , &gy , &gz );
+    unsigned long t1 = micros();
+    accelgyro.getAcceleration( &ax , &ay , &az );
+    unsigned long t2 = micros();
+    accelgyro.getRotation( &gx , &gy , &gz );
+    unsigned long t3 = micros();
+    int16_t T = accelgyro.getTemperature();
+    unsigned long t4 = micros();
+    dt0 += t1-t0;
+    dt1 += t2-t1;
+    dt2 += t3-t2;
+    dt3 += t4-t3;
+  }
+  printPeriodAndFrequency( "getMotion6:" , (dt0/N)/1.0e6 , 1.0e6/(dt0/N) );
+  printPeriodAndFrequency( "getAcceleration:" , (dt1/N)/1.0e6 , 1.0e6/(dt1/N) );
+  printPeriodAndFrequency( "getRotation:" , (dt2/N)/1.0e6 , 1.0e6/(dt2/N) );
+  printPeriodAndFrequency( "getTemperature:" , (dt3/N)/1.0e6 , 1.0e6/(dt3/N) );
+  Serial.println();
 }
 
+
+void printPeriodAndFrequency( char* name , double period , double frequency )
+{
+  Serial.println( name );
+  Serial.print( "  " );
+  Serial.print( period , 6 );
+  Serial.print( " [s]\n  " );
+  Serial.print( frequency , 6 );
+  Serial.println( " [Hz]" );
+}

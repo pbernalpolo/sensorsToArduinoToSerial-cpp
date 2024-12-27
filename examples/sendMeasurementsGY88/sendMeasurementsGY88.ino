@@ -10,10 +10,8 @@
 #define IMU_MEASUREMENTS_PER_MAGNETOMETER_MEASUREMENT 20
 #define IMU_MEASUREMENTS_PER_PRESSURE_MEASUREMENTS 40
 
-// choose one mode:
+// Comment the following line to enable PRINT_MEASUREMENTS_MODE
 #define MEASUREMENT_PACKET_MODE
-//#define PRINT_MODE
-//#define BENCHMARK_MODE
 
 
 // I2Cdev and MPU6050 must be installed as libraries, or else the .cpp/.h files
@@ -106,20 +104,20 @@ void setup() {
   
   // configure devices
   accelgyro.setRate( 8 );  // while ODR_w=8kHz, ODR_a=1kHz => we divide by 8 to obtain the same sample rates and the same accel measurement is not used twice // no divider -> max sample rate
-  accelgyro.setDLPFMode( MPU6050_IMU::MPU6050_DLPF_BW_256 );  // no low-pass filter -> max sample rate
-  accelgyro.setDHPFMode( MPU6050_IMU::MPU6050_DHPF_RESET );  // no high-pass filter
-  accelgyro.setFullScaleAccelRange( MPU6050_IMU::MPU6050_ACCEL_FS_16 );  // 16g
-  accelgyro.setFullScaleGyroRange( MPU6050_IMU::MPU6050_GYRO_FS_2000 );  // 2000deg/s
+  accelgyro.setDLPFMode( MPU6050_DLPF_BW_256 );  // no low-pass filter -> max sample rate
+  accelgyro.setDHPFMode( MPU6050_DHPF_RESET );  // no high-pass filter
+  accelgyro.setFullScaleAccelRange( MPU6050_ACCEL_FS_16 );  // 16g
+  accelgyro.setFullScaleGyroRange( MPU6050_GYRO_FS_2000 );  // 2000deg/s
 
   mag.setMode( HMC5883L_MODE_CONTINUOUS );
   mag.setDataRate( HMC5883L_RATE_75 );
   mag.setSampleAveraging( HMC5883L_AVERAGING_1 );
 
   // verify connection
-  Serial.println("Testing device connections...");
-  Serial.println(accelgyro.testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed");
-  Serial.println(mag.testConnection() ? "HMC5883L connection successful" : "HMC5883L connection failed");
-  Serial.println(barometer.testConnection() ? "BMP085 connection successful" : "BMP085 connection failed");
+  //Serial.println("Testing device connections...");
+  //Serial.println(accelgyro.testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed" );
+  //Serial.println(mag.testConnection() ? "HMC5883L connection successful" : "HMC5883L connection failed" );
+  //Serial.println(barometer.testConnection() ? "BMP085 connection successful" : "BMP085 connection failed" );
 
   // initialize averaged temperatures
   temperatureAveraged = 0;
@@ -192,74 +190,10 @@ void loop() {
       theBytes = messageSerializer.prepareBytesToWrite( bmp085mp.bytes() , bmp085mp.bytesLength() );
       Serial.write( (byte*)theBytes , messageSerializer.preparedBytesToWriteLength() );
     }
-  #elif defined PRINT_MODE
+  #else
     mpu6050mp.print();
     hmc5883lmp.print();
     bmp085mp.print();
-  #elif defined BENCHMARK_MODE
-    test_measurementFrequency();
-  #else
-    Serial.println( "Select a valid mode at the top of the script." );
-    while( true );
   #endif
-}
-
-
-void test_measurementFrequency() {
-  int16_t ax, ay, az;
-  int16_t gx, gy, gz;
-  int16_t mx, my, mz;
   
-  int N = 1000;
-  float dt0 = 0.0;
-  float dt1 = 0.0;
-  float dt2 = 0.0;
-  float dt3 = 0.0;
-  float dt4 = 0.0;
-  float dt5 = 0.0;
-  float dt6 = 0.0;
-  for(int i=0; i<N; i++){
-    wdt_reset();
-    unsigned long t0 = micros();
-    accelgyro.getMotion6( &ax , &ay , &az , &gx , &gy , &gz );
-    unsigned long t1 = micros();
-    accelgyro.getAcceleration( &ax , &ay , &az );
-    unsigned long t2 = micros();
-    accelgyro.getRotation( &gx , &gy , &gz );
-    unsigned long t3 = micros();
-    int16_t T = accelgyro.getTemperature();
-    unsigned long t4 = micros();
-    mag.getHeading(&mx, &my, &mz);
-    unsigned long t5 = micros();
-    barometer.setControl( BMP085_MODE_PRESSURE_0 );
-    int32_t p = barometer.getPressure();
-    unsigned long t6 = micros();
-    barometer.setControl( BMP085_MODE_TEMPERATURE );
-    float temp = barometer.getTemperatureC();
-    unsigned long t7 = micros();
-    dt0 += t1-t0;
-    dt1 += t2-t1;
-    dt2 += t3-t2;
-    dt3 += t4-t3;
-    dt4 += t5-t4;
-    dt5 += t6-t5;
-    dt6 += t7-t6;
-  }
-  Serial.print( "getMotion6: " );
-  Serial.print( 1.0e6/(dt0/N) , 6 );
-  Serial.print( " [Hz]   getAcceleration: " );
-  Serial.print( 1.0e6/(dt1/N) , 6 );
-  Serial.print( " [Hz]   getRotation: " );
-  Serial.print( 1.0e6/(dt2/N) , 6 );
-  Serial.print( " [Hz]   getTemperature: " );
-  Serial.print( 1.0e6/(dt3/N) , 6 );
-  Serial.print( " [Hz]   getHeading: " );
-  Serial.print( 1.0e6/(dt4/N) , 6 );
-  Serial.print( " [Hz]   getRawPressure: " );
-  Serial.print( 1.0e6/(dt5/N) , 6 );
-  Serial.print( " [Hz]   getRawTemperature: " );
-  Serial.print( 1.0e6/(dt6/N) , 6 );
-  Serial.print( " [Hz]" );
-  Serial.println();
 }
-

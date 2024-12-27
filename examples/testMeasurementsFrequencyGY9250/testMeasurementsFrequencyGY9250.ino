@@ -3,13 +3,23 @@
 // ~/.arduino15/packages/arduino/hardware/avr/1.8.6/platform.txt
 // and substitute in compiler flags "-Os" by "-O3"
 
+/*
+updateGyro:
+  0.000927 [s]
+  1079.079223 [Hz]
+updateAccel:
+  0.000925 [s]
+  1080.842773 [Hz]
+updateTemperature:
+  0.000607 [s]
+  1647.630981 [Hz]
+updateCompass:
+  0.001119 [s]
+  893.594299 [Hz]
+*/
 
-#define DEVICE_ID_MPU6500 21
-#define DEVICE_ID_AK8963 22
+
 #define LED_PIN 13
-#define IMU_MEASUREMENTS_PER_MAGNETOMETER_MEASUREMENT 20
-// // Comment the following line to enable PRINT_MEASUREMENTS_MODE
-#define MEASUREMENT_PACKET_MODE
 
 
 #include <SparkFunMPU9250-DMP.h>
@@ -23,21 +33,8 @@
 
 MPU9250_DMP imu;
 
-G16A16T16 mpu6500mp = G16A16T16( DEVICE_ID_MPU6500 );
-M16T16 ak8963mp = M16T16( DEVICE_ID_AK8963 );
-MessageSerializerDeserializer messageSerializer = MessageSerializerDeserializer();
-
-int32_t temperatureAveraged;
-int16_t counterGA;
-int16_t counterM;
-int16_t counterNextM;
-
 
 void setup() {
-  // first of all, we reset the watchdog, and we enable it
-  wdt_reset();
-  wdt_enable(WDTO_1S);
-  
   // configure Arduino LED pin for output, and activate it during setup
   pinMode( LED_PIN , OUTPUT );
   digitalWrite( LED_PIN , true );
@@ -103,57 +100,48 @@ void setup() {
   // This value can range between: 1-100Hz
   imu.setCompassSampleRate( 100 ); // Set mag rate to 10Hz
 
-  // initialize averaged temperature
-  temperatureAveraged = 0;
-
-  // initialize counters
-  counterGA = 0;
-  counterM = 0;
-  counterNextM = 0;
-
   // we deactivate the led before entering the loop
   digitalWrite( LED_PIN , false );
 }
 
 
 void loop() {
-  // first, we reset the watchdog
-  wdt_reset();
-  
-  // read raw accel/gyro measurements from device and update values inside imu object
-  imu.updateGyro();
-  imu.updateAccel();
-  imu.updateTemperature();
-  
-  // set information in MeasurementPacket
-  counterGA++;
-  mpu6500mp.setCount( counterGA );
-  mpu6500mp.setGyroscopeMeasurement( imu.gx , imu.gy , imu.gz );
-  mpu6500mp.setAccelerometerMeasurement( imu.ax , imu.ay , imu.az );
-  mpu6500mp.setTemperatureMeasurement( imu.temperature );
-
-  // measure with the magnetometer only sometimes
-  temperatureAveraged += imu.temperature;
-  if( counterNextM >= IMU_MEASUREMENTS_PER_MAGNETOMETER_MEASUREMENT ) {
+  int N = 1000;
+  float dt0 = 0.0;
+  float dt1 = 0.0;
+  float dt2 = 0.0;
+  float dt3 = 0.0;
+  for(int i=0; i<N; i++){
+    wdt_reset();
+    unsigned long t0 = micros();
+    imu.updateGyro();
+    unsigned long t1 = micros();
+    imu.updateAccel();
+    unsigned long t2 = micros();
+    imu.updateTemperature();
+    unsigned long t3 = micros();
     imu.updateCompass();
-    counterM++;
-    ak8963mp.setCount( counterM );
-    ak8963mp.setMagnetometerMeasurement( imu.mx , imu.my , imu.mz );
-    ak8963mp.setTemperatureMeasurement( (int16_t)(temperatureAveraged/IMU_MEASUREMENTS_PER_MAGNETOMETER_MEASUREMENT) );
-    temperatureAveraged = 0;
-    counterNextM = 0;
+    unsigned long t4 = micros();
+    dt0 += t1-t0;
+    dt1 += t2-t1;
+    dt2 += t3-t2;
+    dt3 += t4-t3;
   }
-  counterNextM++;
-  
-  #if defined MEASUREMENT_PACKET_MODE
-    int8_t* theBytes = messageSerializer.prepareBytesToWrite( mpu6500mp.bytes() , mpu6500mp.bytesLength() );
-    Serial.write( (byte*)theBytes , messageSerializer.preparedBytesToWriteLength() );
-    if( counterNextM == 1 ) {
-      theBytes = messageSerializer.prepareBytesToWrite( ak8963mp.bytes() , ak8963mp.bytesLength() );
-      Serial.write( (byte*)theBytes , messageSerializer.preparedBytesToWriteLength() );
-    }
-  #else
-    mpu6500mp.print();
-    ak8963mp.print();
-  #endif
+  printPeriodAndFrequency( "updateGyro:" , (dt0/N)/1.0e6 , 1.0e6/(dt0/N) );
+  printPeriodAndFrequency( "updateAccel:" , (dt1/N)/1.0e6 , 1.0e6/(dt1/N) );
+  printPeriodAndFrequency( "updateTemperature:" , (dt2/N)/1.0e6 , 1.0e6/(dt2/N) );
+  printPeriodAndFrequency( "updateCompass:" , (dt3/N)/1.0e6 , 1.0e6/(dt3/N) );
+  Serial.println();
 }
+
+
+void printPeriodAndFrequency( char* name , double period , double frequency )
+{
+  Serial.println( name );
+  Serial.print( "  " );
+  Serial.print( period , 6 );
+  Serial.print( " [s]\n  " );
+  Serial.print( frequency , 6 );
+  Serial.println( " [Hz]" );
+}
+

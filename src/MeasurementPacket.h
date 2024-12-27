@@ -2,7 +2,7 @@
 #define _MEASUREMENT_PACKET_H_
 
 
-#define PACKET_MAX_SIZE 50
+#define PACKET_MAX_SIZE 24
 
 
 #include <stdint.h>
