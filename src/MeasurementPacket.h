@@ -23,8 +23,10 @@ class MeasurementPacket
         static const int16_t G16A16M16T16_ID = 2;
         static const int16_t M16T16_ID = 3;
         static const int16_t P32Tf_ID = 4;
-    
-
+        static const int16_t F16D16_ID = 8;
+        
+        
+        
     ////////////////////////////////////////////////////////////////
     // PRIVATE CONSTANT PARAMETERS
     ////////////////////////////////////////////////////////////////
