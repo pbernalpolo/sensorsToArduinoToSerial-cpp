@@ -136,35 +136,32 @@ void loop() {
   wdt_reset();
   
   for (int i = 0; i < N_PAIRS; i++) {
-    // --- Optical flow ---
-    flowSensors[i]->readMotionCount(&deltaX, &deltaY);
-
     // --- Distance ---
     if( distSensors[i]->dataReady() ) {
       distance = distSensors[i]->distance(); // mm
-      distSensors[i]->clearInterrupt();
-    } else {
-      distance = -2;
+      //distSensors[i]->clearInterrupt();
+      // --- Optical flow ---
+      flowSensors[i]->readMotionCount(&deltaX, &deltaY);
+      // --- Print ---
+/*      Serial.print("Pair ");
+      Serial.print(i);
+      Serial.print(" | Flow dx=");
+      Serial.print(deltaX);
+      Serial.print(" dy=");
+      Serial.print(deltaY);
+      Serial.print(" | Dist=");
+      Serial.print(distance);
+      Serial.println(" mm");*/
+      flowDistanceMeasurementPacket[i]->setCount( counter );
+      counter++;
+      flowDistanceMeasurementPacket[i]->setFlowMeasurement( deltaX , deltaY );
+      flowDistanceMeasurementPacket[i]->setDistanceMeasurement( distance );
+
+      int8_t* theBytes = messageSerializer.prepareBytesToWrite( flowDistanceMeasurementPacket[i]->bytes() , flowDistanceMeasurementPacket[i]->bytesLength() );
+      Serial.write( (byte*)theBytes , messageSerializer.preparedBytesToWriteLength() );
+
     }
-
-    // --- Print ---
-    /*Serial.print("Pair ");
-    Serial.print(i);
-    Serial.print(" | Flow dx=");
-    Serial.print(deltaX);
-    Serial.print(" dy=");
-    Serial.print(deltaY);
-    Serial.print(" | Dist=");
-    Serial.print(distance);
-    Serial.println(" mm");*/
-    flowDistanceMeasurementPacket[i]->setCount( counter );
-    counter++;
-    flowDistanceMeasurementPacket[i]->setFlowMeasurement( deltaX , deltaY );
-    flowDistanceMeasurementPacket[i]->setDistanceMeasurement( distance );
-
-    int8_t* theBytes = messageSerializer.prepareBytesToWrite( flowDistanceMeasurementPacket[i]->bytes() , flowDistanceMeasurementPacket[i]->bytesLength() );
-    Serial.write( (byte*)theBytes , messageSerializer.preparedBytesToWriteLength() );
   }
 
-  delay(100); // adjust sample speed
+  //delay(10); // adjust sample speed
 }
