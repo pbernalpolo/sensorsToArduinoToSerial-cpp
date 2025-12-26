@@ -24,6 +24,7 @@ class MeasurementPacket
         static const int16_t M16T16_ID = 3;
         static const int16_t P32Tf_ID = 4;
         static const int16_t F16D16_ID = 8;
+        static const int16_t PMW3901D16_ID = 9;
         
         
         
@@ -85,10 +86,16 @@ class MeasurementPacket
         static int8_t sensorIdDecode( const int8_t* b );
         static void int8Encode( int8_t value , int8_t* b , int index );
         static int8_t int8Decode( const int8_t* b , int index );
+        static void uint8Encode( uint8_t value , int8_t* b , int index );
+        static uint8_t uint8Decode( const int8_t* b , int index );
         static void int16Encode( int16_t value , int8_t* b , int index );
         static int16_t int16Decode( const int8_t* b , int index );
+        static void uint16Encode( uint16_t value , int8_t* b , int index );
+        static uint16_t uint16Decode( const int8_t* b , int index );
         static void int32Encode( int32_t value , int8_t* b , int index );
         static int32_t int32Decode( const int8_t* b , int index );
+        static void uint32Encode( uint32_t value , int8_t* b , int index );
+        static uint32_t uint32Decode( const int8_t* b , int index );
         static void int64Encode( int64_t value , int8_t* b , int index );
         static int64_t int64Decode( const int8_t* b , int index );
         static void floatEncode( float value , int8_t* b , int index );
@@ -103,10 +110,16 @@ class MeasurementPacket
     protected:
         void int8Encode( int8_t value , int index ) const;
         int8_t int8Decode( int index ) const;
+        void uint8Encode( uint8_t value , int index ) const;
+        uint8_t uint8Decode( int index ) const;
         void int16Encode( int16_t value , int index ) const;
         int16_t int16Decode( int index ) const;
+        void uint16Encode( uint16_t value , int index ) const;
+        uint16_t uint16Decode( int index ) const;
         void int32Encode( int32_t value , int index ) const;
         int32_t int32Decode( int index ) const;
+        void uint32Encode( uint32_t value , int index ) const;
+        uint32_t uint32Decode( int index ) const;
         void int64Encode( int64_t value , int index ) const;
         int64_t int64Decode( int index ) const;
         void floatEncode( float value , int index ) const;

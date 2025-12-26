@@ -150,6 +150,18 @@ int8_t MeasurementPacket::int8Decode( const int8_t* b , int index )
 }
 
 
+void MeasurementPacket::uint8Encode( uint8_t value , int8_t* b , int index )
+{
+    b[index] = value;
+}
+
+
+uint8_t MeasurementPacket::uint8Decode( const int8_t* b , int index )
+{
+    return b[index];
+}
+
+
 void MeasurementPacket::int16Encode( int16_t value , int8_t* b , int index )
 {
     // we create a int8_t pointer pointing to the address of the int16
@@ -164,6 +176,24 @@ int16_t MeasurementPacket::int16Decode( const int8_t* b , int index )
     // we create a int16 pointer pointing to the first byte
     int16_t* valuePointer = (int16_t*) &b[index];
     // we return the value of the int16 pointed by the pointer
+    return *valuePointer;
+}
+
+
+void MeasurementPacket::uint16Encode( uint16_t value , int8_t* b , int index )
+{
+    // we create a int8_t pointer pointing to the address of the int16
+    int8_t* packets = (int8_t*) &value;
+    b[index] = packets[0];
+    b[index+1] = packets[1];
+}
+
+
+uint16_t MeasurementPacket::uint16Decode( const int8_t* b , int index )
+{
+    // we create a uint16 pointer pointing to the first byte
+    uint16_t* valuePointer = (uint16_t*) &b[index];
+    // we return the value of the uint16 pointed by the pointer
     return *valuePointer;
 }
 
@@ -184,6 +214,26 @@ int32_t MeasurementPacket::int32Decode( const int8_t* b , int index )
     // we create a int32 pointer pointing to the first byte
     int32_t* valuePointer = (int32_t*) &b[index];
     // we return the value of the int32 pointed by the pointer
+    return *valuePointer;
+}
+
+
+void MeasurementPacket::uint32Encode( uint32_t value , int8_t* b , int index )
+{
+    // we create a int8_t pointer pointing to the address of the int32
+    int8_t* packets = (int8_t*) &value;
+    b[index] = packets[0];
+    b[index+1] = packets[1];
+    b[index+2] = packets[2];
+    b[index+3] = packets[3];
+}
+
+
+uint32_t MeasurementPacket::uint32Decode( const int8_t* b , int index )
+{
+    // we create a uint32 pointer pointing to the first byte
+    uint32_t* valuePointer = (uint32_t*) &b[index];
+    // we return the value of the uint32 pointed by the pointer
     return *valuePointer;
 }
 
@@ -273,6 +323,18 @@ int8_t MeasurementPacket::int8Decode( int index ) const
 }
 
 
+void MeasurementPacket::uint8Encode( uint8_t value , int index ) const
+{
+    MeasurementPacket::uint8Encode( value , this->b.data() , MeasurementPacket::indexShifted( index ) );
+}
+
+
+uint8_t MeasurementPacket::uint8Decode( int index ) const
+{
+    return MeasurementPacket::uint8Decode( this->b.data() , MeasurementPacket::indexShifted( index ) );
+}
+
+
 void MeasurementPacket::int16Encode( int16_t value , int index ) const
 {
     MeasurementPacket::int16Encode( value , this->b.data() , MeasurementPacket::indexShifted( index ) );
@@ -285,6 +347,18 @@ int16_t MeasurementPacket::int16Decode( int index ) const
 }
 
 
+void MeasurementPacket::uint16Encode( uint16_t value , int index ) const
+{
+    MeasurementPacket::uint16Encode( value , this->b.data() , MeasurementPacket::indexShifted( index ) );
+}
+
+
+uint16_t MeasurementPacket::uint16Decode( int index ) const
+{
+    return MeasurementPacket::uint16Decode( this->b.data() , MeasurementPacket::indexShifted( index ) );
+}
+
+
 void MeasurementPacket::int32Encode( int32_t value , int index ) const
 {
     MeasurementPacket::int32Encode( value , this->b.data() , MeasurementPacket::indexShifted( index ) );
@@ -294,6 +368,18 @@ void MeasurementPacket::int32Encode( int32_t value , int index ) const
 int32_t MeasurementPacket::int32Decode( int index ) const
 {
     return MeasurementPacket::int32Decode( this->b.data() , MeasurementPacket::indexShifted( index ) );
+}
+
+
+void MeasurementPacket::uint32Encode( uint32_t value , int index ) const
+{
+    MeasurementPacket::uint32Encode( value , this->b.data() , MeasurementPacket::indexShifted( index ) );
+}
+
+
+uint32_t MeasurementPacket::uint32Decode( int index ) const
+{
+    return MeasurementPacket::uint32Decode( this->b.data() , MeasurementPacket::indexShifted( index ) );
 }
 
 
